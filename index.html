@@ -351,7 +351,7 @@ header .logo b{color:var(--ui-acc);font-weight:700}
 
 <div class="swatches dd" id="swatches"></div>
 <div class="swatches dd" id="textcolors"></div>
-<div class="txtmenu dd" id="txtmenu"><button data-k="h">Заголовок</button><button data-k="sub">Подзаголовок</button><button data-k="body">Обычный текст</button></div>
+<div class="txtmenu dd" id="txtmenu"><button data-k="h">Заголовок</button><button data-k="sub">Подзаголовок</button><button data-k="body">Обычный текст</button><button data-k="cursive">Курсив</button></div>
 <div class="txtmenu dd alnmenu" id="alnmenu"><button data-align="left">◧ Слева</button><button data-align="center">▣ По центру</button><button data-align="right">◨ Справа</button><button data-align="justify">▤ По ширине</button></div>
 <div class="modal" id="modal">
   <div class="mh">
@@ -628,9 +628,9 @@ function wirePanZoom(p){
 /* ---- editable text: placeholder + move + delete + pinch-scale ---- */
 function refreshPlaceholder(el){el.classList.toggle('ph-empty',(el.textContent||'').replace(/​/g,'').trim()==='');}
 function addTextBlock(slideEl,kind){
-  var cls={h:'h',sub:'sub',body:'body'}[kind]||'body';
-  var fs={h:'40px',sub:'22px',body:'20px'}[kind]||'20px';
-  var txt={h:'Заголовок',sub:'Подзаголовок',body:'Текст'}[kind]||'Текст';
+  var cls={h:'h',sub:'sub',body:'body',cursive:'kicker'}[kind]||'body';
+  var fs={h:'40px',sub:'22px',body:'20px',cursive:'26px'}[kind]||'20px';
+  var txt={h:'Заголовок',sub:'Подзаголовок',body:'Текст',cursive:'надпись'}[kind]||'Текст';
   var b=document.createElement('div');b.className=cls;b.setAttribute('data-edit','');b.setAttribute('data-ph',txt);
   var _n=slideEl.querySelectorAll('[data-added]').length;b.setAttribute('data-added','');b.style.position='absolute';b.style.left=(70+(_n%6)*18)+'px';b.style.top=(300+(_n%6)*56)+'px';b.style.width='320px';b.style.fontSize=fs;b.style.zIndex='7';
   b.textContent=txt;
