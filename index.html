@@ -731,8 +731,7 @@ function wireEditable(el){
       var isDouble=(now-lastTapT<350)&&(Math.abs(e.clientX-lastTapX)+Math.abs(e.clientY-lastTapY)<24);
       lastTapT=isDouble?0:now;lastTapX=e.clientX;lastTapY=e.clientY;
       window.__zTop=(window.__zTop||30)+1;el.style.zIndex=String(window.__zTop);
-      try{el.focus();}catch(_){}
-      if(isDouble)selectWordAt(e.clientX,e.clientY);else placeCaret(e.clientX,e.clientY);
+      try{if(isDouble)selectWordAt(e.clientX,e.clientY);else placeCaret(e.clientX,e.clientY);}catch(_){}
     }
     lpTimer=setTimeout(function(){lpTimer=null;if(Object.keys(tp).length>=2)return;
       try{el.setPointerCapture(e.pointerId);}catch(_){}
@@ -743,7 +742,7 @@ function wireEditable(el){
     if(dragging){dragMove(e);return;}
     var moved=Math.abs(e.clientX-lpX)+Math.abs(e.clientY-lpY)>10;
     if(lpTimer&&moved){clearTimeout(lpTimer);lpTimer=null;}
-    if(!dragging&&Object.keys(tp).length<2&&moved)placeCaret(e.clientX,e.clientY);
+    if(!dragging&&Object.keys(tp).length<2&&moved){try{placeCaret(e.clientX,e.clientY);}catch(_){}}
   });
   function lpEnd(e){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;}if(dragging){mup();if(e&&e.preventDefault)e.preventDefault();}}
   el.addEventListener('pointerup',lpEnd);el.addEventListener('pointercancel',lpEnd);
