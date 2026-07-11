@@ -627,12 +627,32 @@ function wirePanZoom(p){
 
 /* ---- editable text: placeholder + move + delete + pinch-scale ---- */
 function refreshPlaceholder(el){el.classList.toggle('ph-empty',(el.textContent||'').replace(/​/g,'').trim()==='');}
+function rectsOverlap(a,b){return !(a.right<=b.left||a.left>=b.right||a.bottom<=b.top||a.top>=b.bottom);}
+function findFreeSpot(slideEl,w,h){
+  var others=Array.prototype.slice.call(slideEl.querySelectorAll('[data-edit]')).map(function(s){
+    return {left:s.offsetLeft,top:s.offsetTop,right:s.offsetLeft+(s.offsetWidth||w),bottom:s.offsetTop+(s.offsetHeight||h)};
+  });
+  var slideH=slideEl.classList.contains('f916')?960:675;
+  var x=70,y=120;
+  for(var attempt=0;attempt<40;attempt++){
+    var cand={left:x,top:y,right:x+w,bottom:y+h};
+    var hit=false;
+    for(var i=0;i<others.length;i++){if(rectsOverlap(cand,others[i])){hit=true;break;}}
+    if(!hit)return {x:x,y:y};
+    y+=60;
+    if(y+h>slideH-40){y=120;x+=40;}
+  }
+  return {x:x,y:y};
+}
 function addTextBlock(slideEl,kind){
   var cls={h:'h',sub:'sub',body:'body',cursive:'kicker'}[kind]||'body';
   var fs={h:'40px',sub:'22px',body:'20px',cursive:'26px'}[kind]||'20px';
   var txt={h:'Заголовок',sub:'Подзаголовок',body:'Текст',cursive:'надпись'}[kind]||'Текст';
+  var hEst={h:60,sub:34,body:30,cursive:40}[kind]||30;
   var b=document.createElement('div');b.className=cls;b.setAttribute('data-edit','');b.setAttribute('data-ph',txt);
-  var _n=slideEl.querySelectorAll('[data-added]').length;b.setAttribute('data-added','');b.style.position='absolute';b.style.left=(70+(_n%6)*18)+'px';b.style.top=(300+(_n%6)*56)+'px';b.style.width='320px';b.style.fontSize=fs;b.style.zIndex='7';
+  b.setAttribute('data-added','');b.style.position='absolute';b.style.width='auto';b.style.maxWidth='440px';b.style.fontSize=fs;b.style.zIndex='30';
+  var spot=findFreeSpot(slideEl,220,hEst);
+  b.style.left=spot.x+'px';b.style.top=spot.y+'px';
   b.textContent=txt;
   slideEl.appendChild(b);
   wireEditable(b);
@@ -710,6 +730,7 @@ function wireEditable(el){
       var now=Date.now();
       var isDouble=(now-lastTapT<350)&&(Math.abs(e.clientX-lastTapX)+Math.abs(e.clientY-lastTapY)<24);
       lastTapT=isDouble?0:now;lastTapX=e.clientX;lastTapY=e.clientY;
+      window.__zTop=(window.__zTop||30)+1;el.style.zIndex=String(window.__zTop);
       try{el.focus();}catch(_){}
       if(isDouble)selectWordAt(e.clientX,e.clientY);else placeCaret(e.clientX,e.clientY);
     }
