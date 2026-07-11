@@ -685,24 +685,7 @@ function wireEditable(el){
     rz.addEventListener('pointerup',rzup);rz.addEventListener('pointercancel',rzup);
   })();
   /* move via handle + long-press on block */
-  var sx,sy,bl,bt,dragging=false,lpTimer=null,lpX,lpY,lastTapT=0,lastTapX=0,lastTapY=0;
-  function caretRangeAt(x,y){
-    if(document.caretRangeFromPoint)return document.caretRangeFromPoint(x,y);
-    if(document.caretPositionFromPoint){var p=document.caretPositionFromPoint(x,y);if(p){var r=document.createRange();r.setStart(p.offsetNode,p.offset);r.collapse(true);return r;}}
-    return null;
-  }
-  function placeCaret(x,y){var r=caretRangeAt(x,y);if(r){var s=window.getSelection();s.removeAllRanges();s.addRange(r);}}
-  function selectWordAt(x,y){
-    var r=caretRangeAt(x,y);if(!r||r.startContainer.nodeType!==3)return;
-    var node=r.startContainer,text=node.textContent,off=r.startOffset;
-    function isWord(ch){return ch&&/[^\s.,!?;:()«»"'—-]/.test(ch);}
-    var start=off,end=off;
-    while(start>0&&isWord(text[start-1]))start--;
-    while(end<text.length&&isWord(text[end]))end++;
-    if(start===end)return;
-    var rr=document.createRange();rr.setStart(node,start);rr.setEnd(node,end);
-    var s=window.getSelection();s.removeAllRanges();s.addRange(rr);
-  }
+  var sx,sy,bl,bt,dragging=false,lpTimer=null,lpX,lpY;
   function freezeSiblings(){
     var p=el.parentNode;if(!p||!p.querySelectorAll)return;
     var kids=p.querySelectorAll(':scope>[data-edit]');
@@ -722,28 +705,16 @@ function wireEditable(el){
   h.addEventListener('pointerdown',function(e){e.preventDefault();e.stopPropagation();dragStart(e);try{h.setPointerCapture(e.pointerId);}catch(_){}});
   h.addEventListener('pointermove',dragMove);
   h.addEventListener('pointerup',mup);h.addEventListener('pointercancel',mup);
-  /* tap=caret, double-tap=select word, hold still 420ms=move block, drag before that=caret follows finger */
+  /* press-and-hold anywhere on the block => move it */
   el.addEventListener('pointerdown',function(e){
     if(e.target.closest('.mv-handle')||e.target.closest('.mv-del')||e.target.closest('.tx-resize'))return;
     if(dragging)return;lpX=e.clientX;lpY=e.clientY;if(lpTimer)clearTimeout(lpTimer);
-    if(Object.keys(tp).length===0){
-      var now=Date.now();
-      var isDouble=(now-lastTapT<350)&&(Math.abs(e.clientX-lastTapX)+Math.abs(e.clientY-lastTapY)<24);
-      lastTapT=isDouble?0:now;lastTapX=e.clientX;lastTapY=e.clientY;
-      window.__zTop=(window.__zTop||30)+1;el.style.zIndex=String(window.__zTop);
-      try{if(isDouble)selectWordAt(e.clientX,e.clientY);else placeCaret(e.clientX,e.clientY);}catch(_){}
-    }
     lpTimer=setTimeout(function(){lpTimer=null;if(Object.keys(tp).length>=2)return;
       try{el.setPointerCapture(e.pointerId);}catch(_){}
       var _s=window.getSelection&&window.getSelection();if(_s){try{_s.removeAllRanges();}catch(__){}}
       try{el.blur();}catch(__){}el.style.userSelect='none';el.style.webkitUserSelect='none';dragStart(e);},420);
   });
-  el.addEventListener('pointermove',function(e){
-    if(dragging){dragMove(e);return;}
-    var moved=Math.abs(e.clientX-lpX)+Math.abs(e.clientY-lpY)>10;
-    if(lpTimer&&moved){clearTimeout(lpTimer);lpTimer=null;}
-    if(!dragging&&Object.keys(tp).length<2&&moved){try{placeCaret(e.clientX,e.clientY);}catch(_){}}
-  });
+  el.addEventListener('pointermove',function(e){if(dragging){dragMove(e);return;}if(lpTimer&&(Math.abs(e.clientX-lpX)+Math.abs(e.clientY-lpY)>10)){clearTimeout(lpTimer);lpTimer=null;}});
   function lpEnd(e){if(lpTimer){clearTimeout(lpTimer);lpTimer=null;}if(dragging){mup();if(e&&e.preventDefault)e.preventDefault();}}
   el.addEventListener('pointerup',lpEnd);el.addEventListener('pointercancel',lpEnd);
   /* pinch-scale font size (two fingers on the text) */
