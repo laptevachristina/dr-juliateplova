@@ -683,7 +683,18 @@ function wireEditable(el){
     var rr=document.createRange();rr.setStart(node,start);rr.setEnd(node,end);
     var s=window.getSelection();s.removeAllRanges();s.addRange(rr);
   }
+  function freezeSiblings(){
+    var p=el.parentNode;if(!p||!p.querySelectorAll)return;
+    var kids=p.querySelectorAll(':scope>[data-edit]');
+    for(var i=0;i<kids.length;i++){
+      var s=kids[i];if(s===el)continue;
+      if(getComputedStyle(s).position==='absolute')continue;
+      var sl=s.offsetLeft,st=s.offsetTop,sw=s.offsetWidth;
+      s.style.position='absolute';s.style.left=sl+'px';s.style.top=st+'px';s.style.margin='0';s.style.width=sw+'px';
+    }
+  }
   function dragStart(e){el.classList.add('moving');
+    freezeSiblings();
     if(getComputedStyle(el).position!=='absolute'){var ol=el.offsetLeft,ot=el.offsetTop,w=el.offsetWidth;el.style.position='absolute';el.style.left=ol+'px';el.style.top=ot+'px';el.style.margin='0';el.style.width=w+'px';}
     sx=e.clientX;sy=e.clientY;bl=parseFloat(el.style.left)||0;bt=parseFloat(el.style.top)||0;dragging=true;}
   function dragMove(e){if(!dragging)return;var sc=curFitScale||1;var nl=bl+(e.clientX-sx)/sc,nt=bt+(e.clientY-sy)/sc;var slide=el.parentNode;if(slide){var bw=el.offsetWidth,bh=el.offsetHeight,T=6;hideGuides(slide);var sibs=slide.querySelectorAll('[data-edit]'),vx=[],hy=[],i,s;for(i=0;i<sibs.length;i++){s=sibs[i];if(s===el)continue;vx.push(s.offsetLeft);vx.push(s.offsetLeft+s.offsetWidth);hy.push(s.offsetTop);hy.push(s.offsetTop+s.offsetHeight);}var k,snV=false;for(k=0;k<vx.length;k++){if(Math.abs(nl-vx[k])<T){nl=vx[k];snV=true;break;}}if(!snV){for(k=0;k<vx.length;k++){if(Math.abs(nl+bw-vx[k])<T){nl=vx[k]-bw;snV=true;break;}}}if(snV){var gv=_guide(slide,'v',0);gv.style.left=nl+'px';gv.style.display='block';}var snH=false;for(k=0;k<hy.length;k++){if(Math.abs(nt-hy[k])<T){nt=hy[k];snH=true;break;}}if(!snH){for(k=0;k<hy.length;k++){if(Math.abs(nt+bh-hy[k])<T){nt=hy[k]-bh;snH=true;break;}}}if(snH){var gt=_guide(slide,'h',0);gt.style.top=nt+'px';gt.style.display='block';var gb=_guide(slide,'h',1);gb.style.top=(nt+bh)+'px';gb.style.display='block';}el.style.left=nl+'px';el.style.top=nt+'px';}else{el.style.left=nl+'px';el.style.top=nt+'px';}e.preventDefault();}
