@@ -650,7 +650,7 @@ function addTextBlock(slideEl,kind){
   var txt={h:'Заголовок',sub:'Подзаголовок',body:'Текст',cursive:'надпись'}[kind]||'Текст';
   var hEst={h:60,sub:34,body:30,cursive:40}[kind]||30;
   var b=document.createElement('div');b.className=cls;b.setAttribute('data-edit','');b.setAttribute('data-ph',txt);
-  b.setAttribute('data-added','');b.style.position='absolute';b.style.width='auto';b.style.maxWidth='440px';b.style.fontSize=fs;b.style.zIndex='30';
+  b.setAttribute('data-added','');b.style.position='absolute';b.style.width='auto';b.style.maxWidth='440px';b.style.whiteSpace='nowrap';b.style.fontSize=fs;b.style.zIndex='30';
   var spot=findFreeSpot(slideEl,220,hEst);
   b.style.left=spot.x+'px';b.style.top=spot.y+'px';
   b.textContent=txt;
